@@ -1,7 +1,6 @@
 # Chroma DB — Unauthorized Information Disclosure
 
 **Date:** 2026-01-08
-**Reporter:** Shay Ben Tikva
 **Severity:** High
 
 ---
