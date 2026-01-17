@@ -1,0 +1,48 @@
+id: chroma-db-unauthorized-info-disclosure
+
+info:
+  name: Chroma DB unauthorized Information Disclosure
+  author: Shay Ben Tikva
+  severity: high
+  description: |
+    The Chroma DB collections endpoints expose collection metadata and can allow
+    retrieval of full Chroma data (ids, names, configuration, dimensions, and other vector-related data).
+    Additionally, the application's `/docs` endpoint exposes the full Swagger/OpenAPI specification which may reveal
+    additional endpoints, parameters, and sensitive details.
+    An attacker can enumerate collections and obtain sensitive vector data via these endpoints.
+    **Recommendation:** restrict access to these endpoints, require proper authentication/authorization, and remove or
+    secure the Swagger docs in production.
+  reference:
+    - https://www.trychroma.com/security
+  metadata:
+    max-request: 2
+  tags: api,misconfig,vuln
+
+http:
+  - raw:
+      - |
+        GET /api/v1/collections?tenant=default_tenant&database=default_database HTTP/1.1
+        Host: {{Hostname}}
+        Accept: application/json
+
+      - |
+        GET /api/v2/tenants/default_tenant/databases/default_database/collections HTTP/1.1
+        Host: {{Hostname}}
+        Accept: application/json
+
+    stop-at-first-match: true
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - '"sync_threshold":'
+          - '"hnsw_configuration":'
+          - '"tenant":"default_tenant"'
+          - '"database":"default_database"'
+
+      - type: word
+        part: header
+        words:
+          - "application/json"
